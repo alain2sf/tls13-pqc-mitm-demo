@@ -79,7 +79,7 @@ go build ./cmd/tls13-pqc-mitm-demo
 ---------------------------------------------------------
 ```
 
-###⚠️ Disclaimer
+### ⚠️ Disclaimer
 **Educational Use Only.**
 
 This code uses standard Go crypto primitives (Ed25519, SHA256) and random bytes to simulate the API flow of ML-KEM and ML-DSA. It is designed to demonstrate the protocol logic (Transcript Binding), not to provide a production-ready implementation of lattice-based cryptography.
