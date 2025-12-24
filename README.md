@@ -32,6 +32,47 @@ The handshake follows the TLS 1.3 state machine:
     *   Client verifies the Server's signature against this local hash.
     *   **Result:** If a MiTM modified the keys in Step 2, the hashes mismatch, the signature fails, and the connection aborts.
 
+```Mermaid
+sequenceDiagram
+    participant C as Client (Alice)
+    participant S as Server (Bob)
+    
+    Note over C,S: Initial Setup
+    C->>C: Init Transcript Hash
+    C->>C: ML-KEM.KeyGen() -> (ephem_pk, ephem_sk)
+    
+    Note over C,S: Phase 1: Key Exchange
+    C->>S: ClientHello { KeyShare: ephem_pk }
+    C->>C: Update Transcript(ClientHello)
+    
+    S->>S: Init Transcript Hash
+    S->>S: Update Transcript(ClientHello)
+    S->>S: ML-KEM.Encaps(ephem_pk) -> (ciphertext, shared_secret)
+    
+    Note over C,S: Phase 2: Server Response & Auth
+    S->>S: Update Transcript(ServerHello)
+    S->>C: ServerHello { KeyShare: ciphertext, Cert: static_pk_ID }
+    
+    S->>S: Hash_Transcript = SHA384(Running_Transcript)
+    S->>S: ML-DSA.Sign(static_sk_ID, Hash_Transcript) -> Signature
+    S->>C: CertificateVerify { Signature }
+    
+    Note over C,S: Phase 3: Verification
+    C->>C: Update Transcript(ServerHello)
+    C->>C: ML-KEM.Decaps(ephem_sk, ciphertext) -> shared_secret
+    
+    C->>C: Hash_Local = SHA384(Running_Transcript)
+    C->>C: ML-DSA.Verify(static_pk_ID, Signature, Hash_Local)
+    
+    alt Signature Valid
+        C->>S: Finished (Encrypted with shared_secret)
+        Note over C: Connection Secure
+    else Signature Invalid
+        C->>S: Alert (Abort)
+        Note over C: MiTM Detected! Transcript mismatch.
+    end
+```
+
 ## 🚀 Getting Started
 
 ### Prerequisites
