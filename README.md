@@ -32,6 +32,8 @@ The handshake follows the TLS 1.3 state machine:
     *   Client verifies the Server's signature against this local hash.
     *   **Result:** If a MiTM modified the keys in Step 2, the hashes mismatch, the signature fails, and the connection aborts.
 
+![](./FlowChart-Mermaid.jpg)
+
 ```Mermaid
 sequenceDiagram
     participant C as Client (Alice)
