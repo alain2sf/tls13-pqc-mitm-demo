@@ -75,6 +75,20 @@ sequenceDiagram
     end
 ```
 
+## ⚙️ Explanation of the MiTM Solution in the Code
+
+If you look at the `runClient` function in the Go code:
+
+1.  **The Transcript:** `transcript.Write(chBytes)` and `transcript.Write(shBytes)`. The client remembers exactly what was sent and received.
+2.  **The Check:** `ed25519.Verify(sh.StaticCert, currentTranscriptHash, cv.Signature)`.
+3.  **The Scenario:**
+    *   If a MiTM attacker intercepted the `ClientHello`, they would have to swap `pk_client` with `pk_attacker`.
+    *   The Server would receive `pk_attacker` and write that into *its* transcript.
+    *   The Server would sign the transcript containing `pk_attacker`.
+    *   The Client, however, has `pk_client` in *its* transcript.
+    *   When the Client verifies the signature, the hashes (Server's view vs Client's view) will not match.
+    *   `ed25519.Verify` returns false.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
